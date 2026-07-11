@@ -2,16 +2,18 @@
 
 Fases sequenciais. Cada fase só é considerada concluída quando seus critérios de saída são atendidos (código funcionando, testado e documentado — não apenas "funciona na minha máquina").
 
-## Fase 0 — Fundação do projeto (atual)
+## Fase 0 — Fundação do projeto (concluída)
 
 - [x] Instalar skill `autonomous-saas-engineer`
 - [x] Documentar arquitetura, módulos e loop de agentes (`ARCHITECTURE.md`)
-- [ ] Escolher e registrar em ADR o monorepo/tooling (pnpm workspaces vs turborepo, etc.)
-- [ ] Scaffold do monorepo (`apps/web`, `apps/api`, `packages/shared-types`)
-- [ ] Configurar lint, format, typecheck e CI (GitHub Actions) desde o início
-- [ ] Definir schema inicial do banco (PostgreSQL) para `Campaign`, `Company`, `WebsiteAudit`, `Lead`
+- [x] Escolher e registrar em ADR o monorepo/tooling (ADR 0004 — pnpm workspaces + Turborepo)
+- [x] Scaffold do monorepo (`apps/web`, `apps/api`, `packages/shared-types`)
+- [x] Configurar lint, format, typecheck e CI (GitHub Actions) desde o início
+- [x] Definir schema inicial do banco (PostgreSQL/Prisma) para `Campaign`, `Company`, `WebsiteAudit`, `OpportunityScore`, `Lead` (ADR 0005)
 
-**Critério de saída:** `pnpm install && pnpm build` roda em CI sem erros, sem nenhuma feature de produto ainda implementada.
+**Critério de saída:** `pnpm install && pnpm exec turbo run lint typecheck build` roda sem erros, sem nenhuma feature de produto ainda implementada. ✅ Verificado localmente; CI (`.github/workflows/ci.yml`) roda o mesmo pipeline em cada PR.
+
+> Migration inicial do Prisma ainda não foi gerada — depende de um `DATABASE_URL` real (ver `TODO.md`). Isso não bloqueia a Fase 1, mas deve ser resolvido antes de qualquer persistência real na Fase 1.
 
 ## Fase 1 — Google Maps Search Engine (módulo 2.1)
 

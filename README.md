@@ -44,13 +44,13 @@ Descrição detalhada de cada módulo, do loop de agentes de IA e das decisões 
 
 ## Documentação
 
-| Documento | Conteúdo |
-|---|---|
+| Documento                              | Conteúdo                                                    |
+| -------------------------------------- | ----------------------------------------------------------- |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Módulos, contratos de dados, loop de agentes, stack técnica |
-| [`ROADMAP.md`](./ROADMAP.md) | Fases de implementação e critérios de saída de cada fase |
-| [`TODO.md`](./TODO.md) | Backlog acionável da fase atual |
-| [`CHANGELOG.md`](./CHANGELOG.md) | Histórico de mudanças (Keep a Changelog) |
-| [`docs/adr/`](./docs/adr) | Decisões de arquitetura registradas (ADRs) |
+| [`ROADMAP.md`](./ROADMAP.md)           | Fases de implementação e critérios de saída de cada fase    |
+| [`TODO.md`](./TODO.md)                 | Backlog acionável da fase atual                             |
+| [`CHANGELOG.md`](./CHANGELOG.md)       | Histórico de mudanças (Keep a Changelog)                    |
+| [`docs/adr/`](./docs/adr)              | Decisões de arquitetura registradas (ADRs)                  |
 
 ## Stack (planejada)
 

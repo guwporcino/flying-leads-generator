@@ -100,12 +100,12 @@ O prompt e o schema de saída vivem versionados em `docs/prompts/website-grader.
 
 Score determinístico que ordena a fila de trabalho. Exemplos de referência:
 
-| Situação | Score |
-|---|---|
-| Sem site | 100 |
+| Situação                                 | Score |
+| ---------------------------------------- | ----- |
+| Sem site                                 | 100   |
 | Site muito antigo (ex.: WordPress ~2012) | 88–92 |
-| Site lento | 74 |
-| Site excelente | 15 |
+| Site lento                               | 74    |
+| Site excelente                           | 15    |
 
 O score final combina um componente determinístico (regras acima) com o `opportunity_score` da IA avaliadora — a fórmula de combinação é uma decisão de produto a registrar em ADR quando implementada (Fase 3).
 
@@ -192,19 +192,19 @@ Agent 8 — Escreve abordagem personalizada
 Fila de Aprovação                            (módulo 2.7)
 ```
 
-Implementação: cada agente é um *job* de fila (BullMQ) encadeado, não uma chamada síncrona — permite retry, observabilidade e paralelismo entre empresas de uma mesma campanha.
+Implementação: cada agente é um _job_ de fila (BullMQ) encadeado, não uma chamada síncrona — permite retry, observabilidade e paralelismo entre empresas de uma mesma campanha.
 
 ---
 
 ## 4. Stack técnica
 
-| Camada | Tecnologia |
-|---|---|
-| Frontend | Next.js, React, Tailwind CSS, shadcn/ui |
-| Backend | NestJS, PostgreSQL, Redis, BullMQ |
-| IA | Claude Code / Claude API, MCP Servers, OpenAI (opcional) |
-| Infra | GitHub, Vercel, Docker, Supabase (Auth) |
-| Mapas | Google Places API, Google Maps JavaScript API, Geocoding API |
+| Camada   | Tecnologia                                                   |
+| -------- | ------------------------------------------------------------ |
+| Frontend | Next.js, React, Tailwind CSS, shadcn/ui                      |
+| Backend  | NestJS, PostgreSQL, Redis, BullMQ                            |
+| IA       | Claude Code / Claude API, MCP Servers, OpenAI (opcional)     |
+| Infra    | GitHub, Vercel, Docker, Supabase (Auth)                      |
+| Mapas    | Google Places API, Google Maps JavaScript API, Geocoding API |
 
 ## 5. Layout de monorepo (proposto — a criar na Fase 0 do ROADMAP)
 
