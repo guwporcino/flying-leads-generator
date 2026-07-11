@@ -1,0 +1,135 @@
+// Modelo inicial — ver ARCHITECTURE.md e packages/shared-types para os
+// contratos de aplicação correspondentes a cada model abaixo.
+//
+// Nenhuma migration foi gerada ainda: este schema deve ser validado contra
+// um Postgres real com `pnpm --filter @flying-leads/api prisma:migrate`
+// assim que DATABASE_URL estiver disponível (ver TODO.md, Fase 0).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  not_sent
+  sent
+  viewed
+  replied
+  interested
+  meeting
+  customer
+  lost
+}
+
+model Campaign {
+  id           String   @id @default(uuid())
+  niche        String
+  city         String
+  neighborhood String?
+  postalCode   String?
+  address      String?
+  radiusKm     Int
+  filters      Json     @default("{}")
+  createdAt    DateTime @default(now())
+
+  companies Company[]
+
+  @@map("campaigns")
+}
+
+model Company {
+  id            String   @id @default(uuid())
+  campaignId    String
+  name          String
+  phone         String?
+  whatsapp      String?
+  website       String?
+  category      String
+  openingHours  String?
+  reviewCount   Int      @default(0)
+  rating        Float?
+  photos        String[]
+  description   String?
+  latitude      Float
+  longitude     Float
+  googleMapsUrl String
+  googlePlaceId String   @unique
+  createdAt     DateTime @default(now())
+
+  campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  websiteAudit     WebsiteAudit?
+  opportunityScore OpportunityScore?
+  lead             Lead?
+
+  @@index([campaignId])
+  @@map("companies")
+}
+
+model WebsiteAudit {
+  id                    String    @id @default(uuid())
+  companyId             String    @unique
+  hasWebsite            Boolean
+  title                 String?
+  description           String?
+  detectedTechnology    String[]
+  pageCount             Int?
+  performanceScore      Int?
+  seoScore              Int?
+  brokenLinksCount      Int?
+  hasHttps              Boolean?
+  isResponsive          Boolean?
+  loadTimeMs            Int?
+  lastUpdatedDetectedAt DateTime?
+  copyrightYear         Int?
+  socialLinks           String[]
+  hasContactForm        Boolean?
+  hasMap                Boolean?
+  hasBlog               Boolean?
+  // Ver WebsiteAuditCriteriaScores / WebsiteAuditFinding[] em @flying-leads/shared-types
+  aiCriteriaScores      Json?
+  aiGrade               String?
+  aiFindings            Json?
+  createdAt             DateTime  @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("website_audits")
+}
+
+model OpportunityScore {
+  id             String   @id @default(uuid())
+  companyId      String   @unique
+  ruleBasedScore Int
+  aiScore        Int?
+  finalScore     Int
+  reason         String
+  computedAt     DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lead    Lead?
+
+  @@map("opportunity_scores")
+}
+
+model Lead {
+  id                 String     @id @default(uuid())
+  companyId          String     @unique
+  opportunityScoreId String?    @unique
+  previewUrl         String?
+  approachMessage    String?
+  status             LeadStatus @default(not_sent)
+  approvedBy         String?
+  approvedAt         DateTime?
+  sentAt             DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  opportunityScore OpportunityScore? @relation(fields: [opportunityScoreId], references: [id])
+
+  @@map("leads")
+}
