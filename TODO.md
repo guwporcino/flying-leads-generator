@@ -1,6 +1,21 @@
 # TODO — backlog acionável
 
-Fase 0 (Fundação do projeto) concluída — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência; próximos itens acionáveis são os da Fase 1 em [`ROADMAP.md`](./ROADMAP.md).
+Fases 0 e 1 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 1 — pendência: validação com credenciais reais
+
+Código completo e testado (mocks) — falta só validar contra a API do Google de verdade:
+
+- [ ] Criar um projeto no Google Cloud, habilitar **Places API (New)** e **Geocoding API**, gerar uma API key
+- [ ] Adicionar `GOOGLE_PLACES_API_KEY` e `GOOGLE_GEOCODING_API_KEY` (pode ser a mesma key se não houver restrição por API) ao `.env` local e/ou como secret do GitHub Actions
+- [ ] Rodar `POST /campaigns` de ponta a ponta (precisa também do Postgres alcançável — rodar localmente ou via um ambiente com rede completa, não este sandbox)
+- [ ] Ajustar `PLACES_FIELD_MASK`/mapeamento em `google-places.types.ts` caso o formato real da resposta divirja do esperado
+
+Próximos itens acionáveis depois disso: Fase 2 — Coletor + Analisador de Website, ver `ROADMAP.md`.
+
+---
+
+## Fase 0 — concluída
 
 ## Fase 0 — concluída
 

@@ -17,12 +17,14 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 1 — Google Maps Search Engine (módulo 2.1)
 
-- [ ] Integração com Google Places API + Geocoding API
-- [ ] Endpoint de campanha: nicho, localização, raio, filtros extras
-- [ ] Persistência de `Company` no banco
-- [ ] Tela de configuração de campanha no dashboard
+- [x] Integração com Google Places API (New, Text Search) + Geocoding API (`GooglePlacesService`)
+- [x] Endpoint de campanha: nicho, localização, raio, filtros extras (`POST /campaigns`)
+- [x] Persistência de `Company` no banco (`PrismaService` + `CampaignsService`)
+- [x] Tela de configuração de campanha no dashboard (`apps/web/src/app/campaigns/new`)
 
 **Critério de saída:** dado um nicho + localização, o sistema retorna e persiste uma lista real de empresas com todos os campos do contrato `Company`.
+
+> Implementado e coberto por testes unitários (mocks de `fetch`/Prisma — 16/16 passando) e `lint`/`typecheck`/`build` verdes. **Não testado ponta a ponta com credenciais reais**: este ambiente de desenvolvimento não tem Google Places/Geocoding API key nem alcança o Postgres do Supabase (rede restrita, ver ADR 0006). Validação real fica para quando houver uma API key configurada — ver `TODO.md`.
 
 ## Fase 2 — Coletor + Analisador de Website (módulos 2.2, 2.3)
 

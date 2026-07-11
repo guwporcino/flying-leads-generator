@@ -62,7 +62,7 @@ Descrição detalhada de cada módulo, do loop de agentes de IA e das decisões 
 
 ## Status
 
-🚧 Fase de planejamento — ver [`ROADMAP.md`](./ROADMAP.md) para a fase ativa. Nenhum código de aplicação foi implementado ainda.
+🚧 Fases 0 e 1 concluídas (fundação do monorepo + Google Maps Search Engine) — ver [`ROADMAP.md`](./ROADMAP.md). Ainda pendente: validar a Fase 1 com uma Google Places/Geocoding API key real (ver `TODO.md`).
 
 ## Skill de engenharia autônoma
 
