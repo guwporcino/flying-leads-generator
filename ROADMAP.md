@@ -13,7 +13,7 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 **Critério de saída:** `pnpm install && pnpm exec turbo run lint typecheck build` roda sem erros, sem nenhuma feature de produto ainda implementada. ✅ Verificado localmente; CI (`.github/workflows/ci.yml`) roda o mesmo pipeline em cada PR.
 
-> Migration inicial do Prisma ainda não foi gerada — depende de um `DATABASE_URL` real (ver `TODO.md`). Isso não bloqueia a Fase 1, mas deve ser resolvido antes de qualquer persistência real na Fase 1.
+> Banco Postgres provisionado no Supabase (ADR 0006) e migration inicial aplicada com sucesso via `.github/workflows/db-migrate.yml`. Fase 0 100% concluída, incluindo persistência real.
 
 ## Fase 1 — Google Maps Search Engine (módulo 2.1)
 

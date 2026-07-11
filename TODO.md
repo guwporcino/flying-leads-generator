@@ -15,11 +15,8 @@ Fase 0 (Fundação do projeto) concluída — ver [`CHANGELOG.md`](./CHANGELOG.m
 - [x] Criar `.env.example` documentando todas as variáveis necessárias
 - [x] Atualizar `CHANGELOG.md` ao final da Fase 0
 
-### Pendência que atravessa para a Fase 1
+### Banco de dados — concluído
 
-Banco escolhido: Supabase (Postgres), ver ADR 0006. Falta apenas **aplicar** a migration já commitada:
-
-- [ ] Adicionar o secret `DATABASE_URL` no repositório (GitHub → Settings → Secrets and variables → Actions → New repository secret), usando a _Session pooler connection string_ do Supabase (a _direct connection_ só resolve em IPv6 e não funciona em runners sem suporte a IPv6).
-- [ ] Disparar o workflow `.github/workflows/db-migrate.yml` (Actions → DB Migrate → Run workflow) para rodar `prisma migrate deploy` contra o Supabase.
+Banco escolhido: Supabase (Postgres), ver ADR 0006. Migration inicial aplicada com sucesso via `.github/workflows/db-migrate.yml` ([run #1](https://github.com/guwporcino/flying-leads-generator/actions/runs/29171619729)) — as 5 tabelas (`campaigns`, `companies`, `website_audits`, `opportunity_scores`, `leads`) já existem no Supabase.
 
 Próximos itens acionáveis: Fase 1 — Google Maps Search Engine, ver `ROADMAP.md`.
