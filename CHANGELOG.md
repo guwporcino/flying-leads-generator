@@ -17,3 +17,4 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - `apps/web` (Next.js + Tailwind + shadcn/ui): shell com página placeholder do dashboard.
 - CI (`.github/workflows/ci.yml`): instala dependências, gera o Prisma Client e roda lint/typecheck/build em cada PR.
 - `.env.example` documentando todas as variáveis necessárias (banco, Redis, Google Maps/Places, Anthropic/OpenAI, GitHub/Vercel, Supabase, WhatsApp Business API).
+- Migration inicial do Prisma (`apps/api/prisma/migrations/20260711225715_init`), gerada offline (sem depender de conexão com banco) e workflow `.github/workflows/db-migrate.yml` para aplicá-la via `prisma migrate deploy` em CI. Banco escolhido: Supabase Postgres, plano free (ADR 0006).
