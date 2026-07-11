@@ -2,14 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
+import { HealthModule } from '../src/health/health.module';
 
+// Só o HealthModule é montado aqui de propósito: os demais módulos dependem
+// do PrismaModule (conexão real com Postgres), que não está disponível no
+// ambiente de testes. Ver TODO.md.
 describe('Health (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [HealthModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();

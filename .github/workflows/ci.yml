@@ -29,3 +29,6 @@ jobs:
 
       - name: Lint, typecheck, build
         run: pnpm exec turbo run lint typecheck build
+
+      - name: Unit and e2e tests (apps/api)
+        run: pnpm --filter @flying-leads/api test && pnpm --filter @flying-leads/api test:e2e

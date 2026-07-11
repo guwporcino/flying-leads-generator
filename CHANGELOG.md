@@ -17,4 +17,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - `apps/web` (Next.js + Tailwind + shadcn/ui): shell com página placeholder do dashboard.
 - CI (`.github/workflows/ci.yml`): instala dependências, gera o Prisma Client e roda lint/typecheck/build em cada PR.
 - `.env.example` documentando todas as variáveis necessárias (banco, Redis, Google Maps/Places, Anthropic/OpenAI, GitHub/Vercel, Supabase, WhatsApp Business API).
-- Migration inicial do Prisma (`apps/api/prisma/migrations/20260711225715_init`), gerada offline (sem depender de conexão com banco) e workflow `.github/workflows/db-migrate.yml` para aplicá-la via `prisma migrate deploy` em CI. Banco escolhido: Supabase Postgres, plano free (ADR 0006).
+- Migration inicial do Prisma (`apps/api/prisma/migrations/20260711225715_init`), gerada offline (sem depender de conexão com banco) e workflow `.github/workflows/db-migrate.yml` para aplicá-la via `prisma migrate deploy` em CI. Banco escolhido: Supabase Postgres, plano free (ADR 0006). Aplicada com sucesso ([run #1](https://github.com/guwporcino/flying-leads-generator/actions/runs/29171619729)) — Fase 0 concluída de ponta a ponta, incluindo persistência real.
+- **Fase 1 — Google Maps Search Engine:**
+  - `PrismaService`/`PrismaModule` (global) integrando o Prisma Client ao NestJS; `ValidationPipe` global e CORS habilitados em `apps/api`.
+  - `GooglePlacesService`: Geocoding API (endereço → lat/lng) e Places API (New) Text Search (nicho + localização → lugares), com mapeamento tipado para o contrato `Company` e 6 testes unitários (mocks de `fetch`).
+  - `CampaignsModule`: `POST /campaigns` (geocodifica, busca no Google, aplica filtros extras client-side, persiste `Campaign` + `Company`), `GET /campaigns`, `GET /campaigns/:id`; DTOs validados com `class-validator`; 6 testes unitários (mocks de Prisma/GooglePlacesService).
+  - `CompaniesModule`: `GET /companies?campaignId=`, `GET /companies/:id`.
+  - `apps/web`: formulário de nova campanha (`/campaigns/new`) com shadcn/ui (Input, Select, Checkbox, Card) — busca empresas e lista o resultado.
+  - CI (`ci.yml`) agora também roda os testes unitário e e2e do `apps/api`.
+  - Não testado com credenciais reais (sem Google API key nem acesso ao Postgres neste ambiente) — pendência registrada em `TODO.md`.
