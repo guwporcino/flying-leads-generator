@@ -49,11 +49,13 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 4 — Gerador de Website + Deploy automático (módulos 2.5, 2.6)
 
-- [ ] Integração com skill de geração de UI (Claude Code)
-- [ ] Pipeline de geração → push para GitHub → deploy Vercel
-- [ ] Persistência do link de preview associado ao lead
+- [x] Integração com skill de geração de UI — `ContentGeneratorService` (Claude via Messages API/tool-use, gera conteúdo estruturado, não código bruto; ver ADR 0010)
+- [x] Pipeline de geração → push para GitHub → deploy Vercel — `WebsiteGenerationProcessor` (`ContentGeneratorService` → `renderSiteFiles` → `GitHubDeployService` → `VercelDeployService`)
+- [x] Persistência do link de preview associado ao lead — `Lead.previewUrl`
 
 **Critério de saída:** para um lead com alta oportunidade, o sistema gera um website completo e publica um link de preview funcional, sem intervenção manual.
+
+> Implementado e coberto por testes unitários (23 novos testes — 79/79 em `apps/api`) e `lint`/`typecheck`/`build` verdes. Duas decisões de escopo, discutidas com o usuário e registradas em ADR 0010: (1) geração via chamada única à API do Claude com saída estruturada, não uma sessão completa do Claude Agent SDK; (2) o pipeline roda "sem intervenção manual" depois de disparado, mas o disparo em si é explícito por empresa (`POST /companies/:id/generate-website`), não automático para toda empresa com alta oportunidade — evita gastar dinheiro em IA/GitHub/Vercel sem uma ação deliberada. Não testado com `GITHUB_TOKEN`/`VERCEL_TOKEN` reais nem contra um `GENERATED_SITES_REPO` real — mesma limitação das fases anteriores.
 
 ## Fase 5 — Fila de Aprovação Manual (módulo 2.7)
 

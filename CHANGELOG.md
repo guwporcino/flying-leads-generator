@@ -41,3 +41,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `OpportunityScoreService` grava o `OpportunityScore` dentro do mesmo pipeline da Fase 2 — logo após `WebsiteAuditsService.markAsOpportunity` (sem site) ou `WebsiteAuditProcessor.process` (com site), espelhando a sequência Agent 3 → Agent 4 do loop de agentes.
   - `GET /companies` e `GET /campaigns/:id` passam a ordenar as empresas por `opportunityScore.finalScore` descendente, com pendentes (ainda na fila) por último (`sortByOpportunity`).
   - 24 novos testes unitários (56/56 no total em `apps/api`).
+- **Fase 4 — Gerador de Website + Deploy automático:**
+  - `ContentGeneratorService`: Claude (tool-use) gera conteúdo estruturado da landing page (SEO, hero, sobre, serviços, CTA) — nunca código bruto.
+  - `renderSiteFiles`: função pura que monta o file set (`package.json`, `next.config.ts`, `tsconfig.json`, `postcss.config.mjs`, `app/layout.tsx`, `app/page.tsx`) a partir da empresa + conteúdo gerado, embutindo todo texto via `JSON.stringify` — garante TSX sintaticamente válido mesmo com conteúdo adversarial da IA (testado com aspas, backticks, `</div>`, `{malicious}`).
+  - `GitHubDeployService`: commit atômico (Git Data API — ref, commit base, tree, novo commit, atualização de branch) no monorepo dedicado de sites, uma pasta por lead (`sites/<slug>`).
+  - `VercelDeployService`: deploy via Deployments API da Vercel com os arquivos embutidos na requisição, sem depender de integração Git pré-configurada.
+  - `WebsiteGenerationProcessor` (fila BullMQ) orquestra os quatro passos e grava `Lead.previewUrl`. Disparo é explícito por empresa (`POST /companies/:id/generate-website`), não automático para toda empresa com alta oportunidade.
+  - ADR 0010 registra as decisões (discutidas com o usuário antes de implementar): geração via API estruturada em vez de sessão completa do Claude Agent SDK; monorepo com uma pasta por lead; deploy Vercel direto por arquivo em vez de integração Git; trigger manual por empresa.
+  - 23 novos testes unitários (79/79 no total em `apps/api`). Não testado com `GITHUB_TOKEN`/`VERCEL_TOKEN` reais nem contra um `GENERATED_SITES_REPO` real — pendência registrada em `TODO.md`.

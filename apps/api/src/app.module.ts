@@ -6,6 +6,7 @@ import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { GooglePlacesModule } from './google-places/google-places.module';
 import { WebsiteAuditsModule } from './website-audits/website-audits.module';
+import { WebsiteGenerationModule } from './website-generation/website-generation.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CompaniesModule } from './companies/companies.module';
 
@@ -24,6 +25,7 @@ import { CompaniesModule } from './companies/companies.module';
     HealthModule,
     GooglePlacesModule,
     WebsiteAuditsModule,
+    WebsiteGenerationModule,
     CampaignsModule,
     CompaniesModule,
   ],

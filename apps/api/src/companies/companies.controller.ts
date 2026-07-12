@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 
 @Controller('companies')
@@ -13,5 +13,11 @@ export class CompaniesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.companiesService.findOne(id);
+  }
+
+  @Post(':id/generate-website')
+  @HttpCode(HttpStatus.ACCEPTED)
+  generateWebsite(@Param('id') id: string) {
+    return this.companiesService.generateWebsite(id);
   }
 }
