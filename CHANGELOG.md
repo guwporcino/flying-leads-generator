@@ -49,3 +49,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `WebsiteGenerationProcessor` (fila BullMQ) orquestra os quatro passos e grava `Lead.previewUrl`. Disparo é explícito por empresa (`POST /companies/:id/generate-website`), não automático para toda empresa com alta oportunidade.
   - ADR 0010 registra as decisões (discutidas com o usuário antes de implementar): geração via API estruturada em vez de sessão completa do Claude Agent SDK; monorepo com uma pasta por lead; deploy Vercel direto por arquivo em vez de integração Git; trigger manual por empresa.
   - 23 novos testes unitários (79/79 no total em `apps/api`). Não testado com `GITHUB_TOKEN`/`VERCEL_TOKEN` reais nem contra um `GENERATED_SITES_REPO` real — pendência registrada em `TODO.md`.
+- **Fase 5 — Fila de Aprovação Manual:**
+  - Migration `20260712004025_add_lead_notes` (campo `Lead.notes`), gerada offline via diff entre os dois schemas (não precisou de banco).
+  - `ApproachMessageService` (Agent 8): Claude (tool-use) escreve a mensagem de abordagem personalizada, rodando dentro do mesmo job do `WebsiteGenerationProcessor` — logo após o deploy, quando já existem `previewUrl` e os achados do `WebsiteAudit`.
+  - `LeadsModule`: `GET /leads` (ordenado por Opportunity Score da empresa), `GET /leads/:id`, `PATCH /leads/:id` (edita mensagem/notas), `POST /leads/:id/send` (grava `approvedBy`/`approvedAt`/`status`/`sentAt` — gate de aprovação humana; não dispara nenhum envio real ainda, isso é a Fase 6).
+  - `apps/web`: `/leads` (lista) e `/leads/[id]` (análise do site antigo vs. preview novo, mensagem e notas editáveis, botão Enviar).
+  - ADR 0011 registra o escopo do "Enviar" nesta fase e a decisão de gerar a mensagem automaticamente, não via trigger separado.
+  - 17 novos testes unitários (88/88 no total em `apps/api`).

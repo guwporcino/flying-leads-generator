@@ -121,6 +121,7 @@ model Lead {
   opportunityScoreId String?    @unique
   previewUrl         String?
   approachMessage    String?
+  notes              String?
   status             LeadStatus @default(not_sent)
   approvedBy         String?
   approvedAt         DateTime?

@@ -9,6 +9,7 @@ import { WebsiteAuditsModule } from './website-audits/website-audits.module';
 import { WebsiteGenerationModule } from './website-generation/website-generation.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CompaniesModule } from './companies/companies.module';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CompaniesModule } from './companies/companies.module';
     WebsiteGenerationModule,
     CampaignsModule,
     CompaniesModule,
+    LeadsModule,
   ],
 })
 export class AppModule {}
