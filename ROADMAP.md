@@ -69,11 +69,13 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 6 — WhatsApp (módulo 2.8)
 
-- [ ] Integração com WhatsApp Business API oficial
-- [ ] Registro de histórico de contato (evita duplicidade)
-- [ ] Fallback documentado para envio manual quando API oficial não se aplica
+- [x] Integração com WhatsApp Business API oficial (Meta Cloud API, mensagem via template pré-aprovado — `WhatsappService`)
+- [x] Registro de histórico de contato (evita duplicidade) — model `ContactAttempt`; `POST /leads/:id/send` recusa reenvio de um lead que já saiu de `not_sent`
+- [x] Fallback documentado para envio manual quando API oficial não se aplica — link `wa.me` (`buildWhatsappManualLink`)
 
 **Critério de saída:** envio de mensagem real via canal oficial, com log de auditoria e sem uso de automação não oficial.
+
+> Implementado e coberto por testes unitários (mocks de `fetch`/Prisma). ADR 0012 registra as decisões técnicas: Cloud API direta (sem BSP), template pré-aprovado como única forma de mensagem inicial (exigência da própria Cloud API para contatos iniciados pela empresa), `POST /leads/:id/send` reaproveitado como único ponto de disparo (conforme já prescrito na ADR 0011). O cadastro/aprovação do template junto à Meta é uma pendência de infraestrutura real — ver `TODO.md`, mesmo padrão das pendências de Google Cloud billing e tokens do GitHub/Vercel.
 
 ## Fase 7 — CRM + Dashboard (módulos 2.9, 2.10)
 

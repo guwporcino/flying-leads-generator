@@ -25,6 +25,16 @@ enum LeadStatus {
   lost
 }
 
+enum ContactChannel {
+  whatsapp_api
+  manual_link
+}
+
+enum ContactAttemptStatus {
+  sent
+  failed
+}
+
 model Campaign {
   id           String   @id @default(uuid())
   niche        String
@@ -131,6 +141,27 @@ model Lead {
 
   company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   opportunityScore OpportunityScore? @relation(fields: [opportunityScoreId], references: [id])
+  contactAttempts  ContactAttempt[]
 
   @@map("leads")
+}
+
+/**
+ * Histórico de contato — ver ADR 0003 e ADR 0012. Uma linha por tentativa de disparo.
+ */
+model ContactAttempt {
+  id                String               @id @default(uuid())
+  leadId            String
+  channel           ContactChannel
+  status            ContactAttemptStatus
+  // channel=whatsapp_api: id da mensagem retornado pela Cloud API.
+  // channel=manual_link: o link wa.me montado para o operador abrir manualmente.
+  providerMessageId String?
+  errorMessage      String?
+  createdAt         DateTime             @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@map("contact_attempts")
 }

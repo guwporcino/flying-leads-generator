@@ -56,3 +56,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `apps/web`: `/leads` (lista) e `/leads/[id]` (análise do site antigo vs. preview novo, mensagem e notas editáveis, botão Enviar).
   - ADR 0011 registra o escopo do "Enviar" nesta fase e a decisão de gerar a mensagem automaticamente, não via trigger separado.
   - 17 novos testes unitários (88/88 no total em `apps/api`).
+- **Fase 6 — WhatsApp:**
+  - `WhatsappService`: envia a mensagem inicial via WhatsApp Business Cloud API (Meta), sempre como template pré-aprovado (`WHATSAPP_TEMPLATE_NAME`/`WHATSAPP_TEMPLATE_LANGUAGE`, default `abordagem_lead`/`pt_BR`) — exigência da própria Cloud API para contatos iniciados pela empresa, fora de qualquer janela de conversa.
+  - `buildWhatsappManualLink`: fallback de abertura de conversa manual (`wa.me/<telefone>?text=<mensagem>`) usado quando não há WhatsApp cadastrado, as credenciais não estão configuradas, ou a chamada à Cloud API falha.
+  - Novo model `ContactAttempt` (migration `20260712030000_add_contact_attempts`): histórico de contato — uma linha por tentativa, com canal, status e erro, usado tanto para auditoria quanto para evitar duplicidade.
+  - `LeadsService.send()` passa a ser o disparo real (reaproveitando `POST /leads/:id/send`, conforme já previsto na ADR 0011): recusa reenvio de um lead que já saiu de `not_sent` (`ConflictException`), tenta a Cloud API e cai automaticamente no fallback manual em caso de falha ou ausência de credenciais.
+  - `apps/web`: tela do lead mostra se o envio foi via API oficial ou se precisa de abertura manual (com o link `wa.me` pronto).
+  - ADR 0012 registra as decisões técnicas: Cloud API direta sem BSP, template único com variável de corpo, fallback manual sempre disponível, histórico via `ContactAttempt`.
+  - 12 novos testes unitários (100/100 no total em `apps/api`) cobrindo `WhatsappService`, `buildWhatsappManualLink` e os caminhos de `LeadsService.send()` (API ok, API indisponível, API falha com fallback, sem telefone, reenvio recusado). Não testado com credenciais reais nem com um template de fato aprovado no Meta Business Manager — pendência registrada em `TODO.md`.

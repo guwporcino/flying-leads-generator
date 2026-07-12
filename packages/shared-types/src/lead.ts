@@ -1,3 +1,5 @@
+import type { ContactAttempt } from './contact-attempt.js';
+
 /** Funil de CRM, ver ARCHITECTURE.md §2.9 */
 export type LeadStatus =
   'not_sent' | 'sent' | 'viewed' | 'replied' | 'interested' | 'meeting' | 'customer' | 'lost';
@@ -20,4 +22,6 @@ export interface Lead {
   sentAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Presente apenas quando o backend inclui o histórico (ex.: resposta de POST /leads/:id/send) */
+  contactAttempts?: ContactAttempt[];
 }
