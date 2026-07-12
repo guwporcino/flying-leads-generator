@@ -3,6 +3,7 @@ import { CampaignsService } from './campaigns.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GooglePlacesService } from '../google-places/google-places.service';
 import { PlaceSearchResultItem } from '../google-places/google-places.types';
+import { WebsiteAuditsService } from '../website-audits/website-audits.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 
 function buildPlace(overrides: Partial<PlaceSearchResultItem> = {}): PlaceSearchResultItem {
@@ -31,6 +32,7 @@ describe('CampaignsService', () => {
     company: { createMany: jest.Mock; findMany: jest.Mock };
   };
   let googlePlaces: { geocode: jest.Mock; searchText: jest.Mock };
+  let websiteAudits: { processCompany: jest.Mock };
 
   const baseDto: CreateCampaignDto = {
     niche: 'dentista',
@@ -56,10 +58,12 @@ describe('CampaignsService', () => {
         .mockResolvedValue({ latitude: -19.92, longitude: -43.93, formattedAddress: 'BH' }),
       searchText: jest.fn().mockResolvedValue([buildPlace()]),
     };
+    websiteAudits = { processCompany: jest.fn().mockResolvedValue(undefined) };
 
     service = new CampaignsService(
       prisma as unknown as PrismaService,
       googlePlaces as unknown as GooglePlacesService,
+      websiteAudits as unknown as WebsiteAuditsService,
     );
   });
 
@@ -82,6 +86,25 @@ describe('CampaignsService', () => {
           data: [expect.objectContaining({ campaignId: 'campaign-1', googlePlaceId: 'places/1' })],
           skipDuplicates: true,
         }),
+      );
+    });
+
+    it('enqueues a website audit for every persisted company', async () => {
+      const persistedCompany = { id: 'company-1', googlePlaceId: 'places/1', website: null };
+      prisma.company.findMany.mockResolvedValue([persistedCompany]);
+
+      await service.create(baseDto);
+
+      expect(websiteAudits.processCompany).toHaveBeenCalledWith(persistedCompany);
+    });
+
+    it('does not let a failed audit enqueue break campaign creation', async () => {
+      const persistedCompany = { id: 'company-1', googlePlaceId: 'places/1', website: null };
+      prisma.company.findMany.mockResolvedValue([persistedCompany]);
+      websiteAudits.processCompany.mockRejectedValue(new Error('queue unavailable'));
+
+      await expect(service.create(baseDto)).resolves.toEqual(
+        expect.objectContaining({ companies: [persistedCompany] }),
       );
     });
 

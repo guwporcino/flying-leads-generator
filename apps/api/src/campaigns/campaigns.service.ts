@@ -1,16 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Campaign, Company, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { GooglePlacesService } from '../google-places/google-places.service';
 import { PlaceSearchResultItem } from '../google-places/google-places.types';
+import { WebsiteAuditsService } from '../website-audits/website-audits.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignFiltersDto } from './dto/campaign-filters.dto';
 
 @Injectable()
 export class CampaignsService {
+  private readonly logger = new Logger(CampaignsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly googlePlaces: GooglePlacesService,
+    private readonly websiteAudits: WebsiteAuditsService,
   ) {}
 
   async create(dto: CreateCampaignDto): Promise<Campaign & { companies: Company[] }> {
@@ -51,6 +55,8 @@ export class CampaignsService {
       where: { googlePlaceId: { in: filtered.map((place) => place.googlePlaceId) } },
     });
 
+    await this.enqueueWebsiteAudits(companies);
+
     return { ...campaign, companies };
   }
 
@@ -67,6 +73,18 @@ export class CampaignsService {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
     return campaign;
+  }
+
+  /** Falha ao enfileirar uma auditoria não deve derrubar a criação da campanha. */
+  private async enqueueWebsiteAudits(companies: Company[]): Promise<void> {
+    const results = await Promise.allSettled(
+      companies.map((company) => this.websiteAudits.processCompany(company)),
+    );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        this.logger.error(`Failed to enqueue website audit: ${String(result.reason)}`);
+      }
+    }
   }
 
   private buildLocationQuery(dto: CreateCampaignDto): string {

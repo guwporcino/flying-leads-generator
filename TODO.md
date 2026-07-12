@@ -1,6 +1,19 @@
 # TODO — backlog acionável
 
-Fases 0 e 1 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0, 1 e 2 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 2 — pendência: validação com Redis + Claude reais
+
+Código completo e testado (mocks) — falta validar contra infraestrutura real:
+
+- [ ] Provisionar um Redis (ex.: Upstash free tier, Redis Cloud free tier) e configurar `REDIS_URL`
+- [ ] Confirmar que `ANTHROPIC_API_KEY` funciona (billing/créditos disponíveis) e rodar `WebsiteGraderService.grade()` contra a API real
+- [ ] Rodar o pipeline completo (`CampaignsService.create()` → fila → `WebsiteAuditProcessor`) de ponta a ponta com Postgres, Redis e as duas API keys reais — precisa de um ambiente com rede irrestrita, não este sandbox
+- [ ] Revisitar os scores heurísticos de `heuristic-scores.ts` (`performanceScore`/`seoScore`) com dados reais; considerar Lighthouse real se a precisão heurística for insuficiente (ver ADR 0008)
+
+Próximos itens acionáveis depois disso: Fase 3 — Opportunity Score, ver `ROADMAP.md`.
+
+---
 
 ## Fase 1 — pendência: validação com credenciais reais
 
