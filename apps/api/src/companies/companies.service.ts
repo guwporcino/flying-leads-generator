@@ -13,8 +13,11 @@ export class CompaniesService {
     });
   }
 
-  async findOne(id: string): Promise<Company> {
-    const company = await this.prisma.company.findUnique({ where: { id } });
+  async findOne(id: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id },
+      include: { websiteAudit: true },
+    });
     if (!company) {
       throw new NotFoundException(`Company ${id} not found`);
     }

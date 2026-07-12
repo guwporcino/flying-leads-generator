@@ -26,3 +26,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `apps/web`: formulário de nova campanha (`/campaigns/new`) com shadcn/ui (Input, Select, Checkbox, Card) — busca empresas e lista o resultado.
   - CI (`ci.yml`) agora também roda os testes unitário e e2e do `apps/api`.
   - Não testado com credenciais reais (sem Google API key nem acesso ao Postgres neste ambiente) — pendência registrada em `TODO.md`.
+- **Fase 2 — Coletor + Analisador de Website:**
+  - `ScraperService`: fetch + parsing (cheerio) de título, descrição, tecnologia, HTTPS, responsividade, copyright, redes sociais, formulário/mapa/blog, contagem aproximada de páginas e amostragem de links quebrados. 10 testes unitários.
+  - `WebsiteGraderService`: avaliação via Claude (Anthropic SDK) usando tool-use para saída estruturada garantida; prompt versionado em `docs/prompts/website-grader.md`. 3 testes unitários.
+  - `heuristic-scores.ts`: aproximação de performance/SEO (não é Lighthouse real — ver ADR 0008). 4 testes unitários.
+  - `WebsiteAuditsModule`: fila BullMQ (`website-audit`) via `@nestjs/bullmq`/Redis, `WebsiteAuditsService` (enfileira empresas com site, marca `hasWebsite: false` diretamente para as sem site) e `WebsiteAuditProcessor` (orquestra scraper → grader → persistência). 8 testes unitários.
+  - `CampaignsService` agora enfileira uma auditoria por empresa persistida logo após criar a campanha; falha ao enfileirar não derruba a criação da campanha.
+  - `GET /companies/:id` passa a incluir o `websiteAudit` relacionado.
+  - ADR 0008 registrando as três decisões técnicas da fase (scraping heurístico sem browser headless, grading via Claude com tool-use, fila BullMQ disparada pelo `CampaignsService`).
+  - Não testado com Redis nem `ANTHROPIC_API_KEY` reais neste ambiente — pendência registrada em `TODO.md`.

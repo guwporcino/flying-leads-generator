@@ -28,12 +28,14 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 2 — Coletor + Analisador de Website (módulos 2.2, 2.3)
 
-- [ ] Job de scraping (fila BullMQ) para empresas com website
-- [ ] Extração de performance/SEO/tecnologia (ex.: via Lighthouse programático)
-- [ ] Prompt versionado do Website Grader (Claude) com saída JSON estruturada
-- [ ] Marcação automática de "sem site" como oportunidade máxima
+- [x] Job de scraping (fila BullMQ) para empresas com website (`WebsiteAuditProcessor`)
+- [x] Extração de performance/SEO/tecnologia — heurística (cheerio + timing), não Lighthouse real neste MVP (ADR 0008)
+- [x] Prompt versionado do Website Grader (Claude, tool-use) com saída JSON estruturada (`docs/prompts/website-grader.md`)
+- [x] Marcação automática de "sem site" como oportunidade máxima (`WebsiteAuditsService`, síncrono, sem fila)
 
 **Critério de saída:** para uma empresa real, o sistema produz um `WebsiteAudit` completo (ou marca oportunidade, se sem site).
+
+> Implementado e coberto por testes unitários (mocks de `fetch`/Anthropic/Prisma/BullMQ — 39/39 passando em `apps/api`) e `lint`/`typecheck`/`build` verdes. **Não testado ponta a ponta com Redis e `ANTHROPIC_API_KEY` reais** — mesma limitação de rede deste ambiente (ver TODO.md e ADR 0006/0007).
 
 ## Fase 3 — Opportunity Score
 
