@@ -4,7 +4,7 @@ Fases 0 a 7 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico aba
 
 ## Fase 7 — pendência: aplicar a migration + validação ponta a ponta
 
-- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase
+- [x] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase — aplicada com sucesso ([run #4](https://github.com/guwporcino/flying-leads-generator/actions/runs/29180001818))
 - [ ] Com o banco/API rodando de verdade, abrir a home (`/`) e conferir o dashboard com dados reais; mover um lead pelo funil e ver as métricas refletirem
 - [ ] Avaliar automatizar o estágio "Visualizou" (tracking de abertura do preview) — hoje é 100% manual; encaixa no mesmo `LeadStatusEvent` sem mudar schema (ver ADR 0013)
 
