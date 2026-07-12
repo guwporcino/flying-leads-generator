@@ -8,7 +8,7 @@ Código completo e testado (mocks) — falta validar contra infraestrutura real:
 
 - [ ] Cadastrar e aprovar o template de mensagem no Meta Business Manager (nome/idioma default: `abordagem_lead`/`pt_BR`, configurável via `WHATSAPP_TEMPLATE_NAME`/`WHATSAPP_TEMPLATE_LANGUAGE`) — nenhum envio real via Cloud API funciona sem isso
 - [ ] Confirmar `WHATSAPP_BUSINESS_API_TOKEN`/`WHATSAPP_BUSINESS_PHONE_NUMBER_ID` reais (número verificado no Meta Business Manager)
-- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712030000_add_contact_attempts` no Supabase
+- [x] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712030000_add_contact_attempts` no Supabase — aplicada com sucesso ([run #3](https://github.com/guwporcino/flying-leads-generator/actions/runs/29179526764))
 - [ ] Rodar `POST /leads/:id/send` de ponta a ponta com um lead real, confirmando o fallback manual (`wa.me`) quando as credenciais não estão configuradas e o envio real quando estão
 
 Próximos itens acionáveis depois disso: Fase 7 — CRM + Dashboard, ver `ROADMAP.md`.
