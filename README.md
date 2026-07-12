@@ -62,7 +62,7 @@ Descrição detalhada de cada módulo, do loop de agentes de IA e das decisões 
 
 ## Status
 
-🚧 Fases 0, 1, 2 e 3 concluídas (fundação do monorepo, Google Maps Search Engine, Coletor + Analisador de Website, Opportunity Score) — ver [`ROADMAP.md`](./ROADMAP.md). Ainda pendente: validar as Fases 1 e 2 com credenciais/infra reais (Google billing, Redis, Anthropic) — ver `TODO.md`.
+🚧 Fases 0 a 4 concluídas (fundação do monorepo, Google Maps Search Engine, Coletor + Analisador de Website, Opportunity Score, Gerador de Website + Deploy) — ver [`ROADMAP.md`](./ROADMAP.md). Ainda pendente: validar as fases com credenciais/infra reais (Google billing, Redis, Anthropic, GitHub/Vercel) — ver `TODO.md`.
 
 ## Skill de engenharia autônoma
 

@@ -1,6 +1,20 @@
 # TODO — backlog acionável
 
-Fases 0, 1, 2 e 3 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 4 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 4 — pendência: validação com GitHub/Vercel reais
+
+Código completo e testado (mocks) — falta validar contra infraestrutura real:
+
+- [ ] Criar o repositório monorepo dedicado aos sites gerados (ex.: `guwporcino/flying-leads-sites`) com um commit inicial na branch base, e configurar `GENERATED_SITES_REPO`
+- [ ] Confirmar que o `GITHUB_TOKEN` tem permissão de escrita nesse repo (Git Data API: refs, commits, trees)
+- [ ] Confirmar o formato exato da resposta da Vercel Deployments API (`POST /v13/deployments` com `files` inline) contra a documentação oficial/uma chamada real — implementado a partir de conhecimento geral da API, nunca validado ao vivo (ver ADR 0010)
+- [ ] Rodar `POST /companies/:id/generate-website` de ponta a ponta com Postgres, Redis, Anthropic, GitHub e Vercel reais
+- [ ] Decidir se/quando vale a pena um gatilho automático por limiar de Opportunity Score, em vez de só o endpoint manual (ver ADR 0010)
+
+Próximos itens acionáveis depois disso: Fase 5 — Fila de Aprovação Manual, ver `ROADMAP.md`.
+
+---
 
 ## Fase 3 — pendência
 
