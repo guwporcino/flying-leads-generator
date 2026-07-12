@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ScraperService } from './scraper/scraper.service';
 import { WebsiteGraderService } from './grader/website-grader.service';
 import { computeHeuristicScores } from './heuristic-scores';
+import { OpportunityScoreService } from '../opportunity-score/opportunity-score.service';
 import { WEBSITE_AUDIT_QUEUE } from './website-audits.constants';
 import { WebsiteAuditJobData } from './website-audits.types';
 
@@ -17,6 +18,7 @@ export class WebsiteAuditProcessor extends WorkerHost {
     private readonly prisma: PrismaService,
     private readonly scraper: ScraperService,
     private readonly grader: WebsiteGraderService,
+    private readonly opportunityScore: OpportunityScoreService,
   ) {
     super();
   }
@@ -43,6 +45,18 @@ export class WebsiteAuditProcessor extends WorkerHost {
       },
       update: this.toAuditFields(scraped, grade, performanceScore, seoScore),
     });
+
+    await this.opportunityScore.recordFromAudit(
+      company.id,
+      {
+        hasWebsite: true,
+        copyrightYear: scraped.copyrightYear,
+        performanceScore,
+        seoScore,
+        hasHttps: scraped.hasHttps,
+      },
+      grade.opportunityScore,
+    );
   }
 
   private toAuditFields(

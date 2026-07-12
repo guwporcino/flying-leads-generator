@@ -151,5 +151,20 @@ describe('CampaignsService', () => {
 
       await expect(service.findOne('missing-id')).rejects.toThrow(NotFoundException);
     });
+
+    it('returns companies sorted by opportunity score', async () => {
+      prisma.campaign.findUnique.mockResolvedValue({
+        id: 'campaign-1',
+        companies: [
+          { id: 'low', opportunityScore: { finalScore: 15 } },
+          { id: 'pending', opportunityScore: null },
+          { id: 'high', opportunityScore: { finalScore: 90 } },
+        ],
+      });
+
+      const result = await service.findOne('campaign-1');
+
+      expect(result.companies.map((company) => company.id)).toEqual(['high', 'low', 'pending']);
+    });
   });
 });

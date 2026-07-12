@@ -35,3 +35,9 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `GET /companies/:id` passa a incluir o `websiteAudit` relacionado.
   - ADR 0008 registrando as três decisões técnicas da fase (scraping heurístico sem browser headless, grading via Claude com tool-use, fila BullMQ disparada pelo `CampaignsService`).
   - Não testado com Redis nem `ANTHROPIC_API_KEY` reais neste ambiente — pendência registrada em `TODO.md`.
+- **Fase 3 — Opportunity Score:**
+  - `computeRuleBasedScore`: regra determinística não-aditiva (sem site=100, site desatualizado=90, lento=74, SEO fraco=60, sem HTTPS=55, saudável=15) com razão explicável.
+  - `combineScores`: combina o score determinístico com o `opportunity_score` da IA por média simples (empresas sem site não passam pela média — score fica 100 direto). Fórmula registrada em ADR 0009.
+  - `OpportunityScoreService` grava o `OpportunityScore` dentro do mesmo pipeline da Fase 2 — logo após `WebsiteAuditsService.markAsOpportunity` (sem site) ou `WebsiteAuditProcessor.process` (com site), espelhando a sequência Agent 3 → Agent 4 do loop de agentes.
+  - `GET /companies` e `GET /campaigns/:id` passam a ordenar as empresas por `opportunityScore.finalScore` descendente, com pendentes (ainda na fila) por último (`sortByOpportunity`).
+  - 24 novos testes unitários (56/56 no total em `apps/api`).

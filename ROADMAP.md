@@ -39,11 +39,13 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 3 — Opportunity Score
 
-- [ ] Regras determinísticas de score (sem site, site antigo, site lento, etc.)
-- [ ] Combinação com `opportunity_score` da IA avaliadora
-- [ ] Ordenação da fila de trabalho por score
+- [x] Regras determinísticas de score (sem site, site antigo, site lento, sem HTTPS, SEO fraco) — `computeRuleBasedScore`
+- [x] Combinação com `opportunity_score` da IA avaliadora — `combineScores` (média simples, ver ADR 0009)
+- [x] Ordenação da fila de trabalho por score — `GET /companies` e `GET /campaigns/:id`, via `sortByOpportunity`
 
 **Critério de saída:** lista de empresas de uma campanha ordenada por oportunidade, com score explicável (breakdown visível).
+
+> Implementado e coberto por testes unitários (24 novos testes — 56/56 em `apps/api`) e `lint`/`typecheck`/`build` verdes. Fórmula de combinação registrada em ADR 0009. Mesma limitação de rede das fases anteriores: não validado com Redis/Anthropic reais neste ambiente.
 
 ## Fase 4 — Gerador de Website + Deploy automático (módulos 2.5, 2.6)
 
