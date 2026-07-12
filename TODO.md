@@ -1,14 +1,25 @@
 # TODO — backlog acionável
 
-Fases 0 a 5 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 6 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
 
-## Fase 5 — pendência: aplicar a migration + validação ponta a ponta
+## Fase 6 — pendência: template WhatsApp + migration + validação ponta a ponta
 
-- [ ] Disparar `.github/workflows/db-migrate.yml` (Actions → DB Migrate → Run workflow) para aplicar `20260712004025_add_lead_notes` no Supabase
+Código completo e testado (mocks) — falta validar contra infraestrutura real:
+
+- [ ] Cadastrar e aprovar o template de mensagem no Meta Business Manager (nome/idioma default: `abordagem_lead`/`pt_BR`, configurável via `WHATSAPP_TEMPLATE_NAME`/`WHATSAPP_TEMPLATE_LANGUAGE`) — nenhum envio real via Cloud API funciona sem isso
+- [ ] Confirmar `WHATSAPP_BUSINESS_API_TOKEN`/`WHATSAPP_BUSINESS_PHONE_NUMBER_ID` reais (número verificado no Meta Business Manager)
+- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712030000_add_contact_attempts` no Supabase
+- [ ] Rodar `POST /leads/:id/send` de ponta a ponta com um lead real, confirmando o fallback manual (`wa.me`) quando as credenciais não estão configuradas e o envio real quando estão
+
+Próximos itens acionáveis depois disso: Fase 7 — CRM + Dashboard, ver `ROADMAP.md`.
+
+---
+
+## Fase 5 — pendência: aplicar a migration + validação ponta a ponta (concluída)
+
+- [x] Disparar `.github/workflows/db-migrate.yml` (Actions → DB Migrate → Run workflow) para aplicar `20260712004025_add_lead_notes` no Supabase
 - [ ] Depois de resolver as pendências da Fase 4 (GitHub/Vercel reais), abrir `/leads` no dashboard e conferir a tela de aprovação com um lead real
-- [ ] Avaliar se vale reaproveitar `POST /leads/:id/send` como o disparo real de WhatsApp na Fase 6, ou se precisa de ajuste — ver ADR 0011
-
-Próximos itens acionáveis depois disso: Fase 6 — WhatsApp, ver `ROADMAP.md`.
+- [x] Avaliar se vale reaproveitar `POST /leads/:id/send` como o disparo real de WhatsApp na Fase 6, ou se precisa de ajuste — ver ADR 0011 (reaproveitado, conforme ADR 0012)
 
 ---
 

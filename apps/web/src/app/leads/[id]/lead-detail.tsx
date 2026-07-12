@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { ContactAttempt } from '@flying-leads/shared-types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,6 +78,7 @@ export function LeadDetail({ lead: initialLead }: { lead: LeadWithCompany }) {
 
   const { company } = lead;
   const audit = company.websiteAudit;
+  const lastContactAttempt = lead.contactAttempts?.[0];
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-8">
@@ -193,13 +195,45 @@ export function LeadDetail({ lead: initialLead }: { lead: LeadWithCompany }) {
           </CardContent>
         </Card>
       ) : (
-        <p className="text-sm text-zinc-500">
-          Aprovado por {lead.approvedBy} em{' '}
-          {lead.approvedAt ? new Date(lead.approvedAt).toLocaleString('pt-BR') : ''}.
-        </p>
+        <div className="flex flex-col gap-2 text-sm text-zinc-500">
+          <p>
+            Aprovado por {lead.approvedBy} em{' '}
+            {lead.approvedAt ? new Date(lead.approvedAt).toLocaleString('pt-BR') : ''}.
+          </p>
+          {lastContactAttempt ? (
+            <ContactAttemptStatusMessage attempt={lastContactAttempt} />
+          ) : null}
+        </div>
       )}
 
       {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
     </div>
   );
+}
+
+function ContactAttemptStatusMessage({ attempt }: { attempt: ContactAttempt }) {
+  if (attempt.channel === 'whatsapp_api' && attempt.status === 'sent') {
+    return <p>Mensagem enviada via WhatsApp Business API oficial.</p>;
+  }
+  if (
+    attempt.channel === 'manual_link' &&
+    attempt.status === 'sent' &&
+    attempt.providerMessageId
+  ) {
+    return (
+      <p>
+        API oficial não disponível para este lead —{' '}
+        <a
+          href={attempt.providerMessageId}
+          target="_blank"
+          rel="noreferrer"
+          className="font-medium underline"
+        >
+          abra o WhatsApp
+        </a>{' '}
+        para enviar manualmente.
+      </p>
+    );
+  }
+  return <p className="text-destructive">Falha ao preparar o envio: {attempt.errorMessage}</p>;
 }

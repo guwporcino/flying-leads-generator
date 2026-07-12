@@ -1,12 +1,15 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { LeadsService } from './leads.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { WhatsappService } from '../whatsapp/whatsapp.service';
 
 describe('LeadsService', () => {
   let service: LeadsService;
   let prisma: {
     lead: { findMany: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
+    contactAttempt: { create: jest.Mock };
   };
+  let whatsapp: { isConfigured: jest.Mock; sendTemplateMessage: jest.Mock };
 
   beforeEach(() => {
     prisma = {
@@ -15,8 +18,16 @@ describe('LeadsService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
       },
+      contactAttempt: { create: jest.fn() },
     };
-    service = new LeadsService(prisma as unknown as PrismaService);
+    whatsapp = {
+      isConfigured: jest.fn().mockReturnValue(false),
+      sendTemplateMessage: jest.fn(),
+    };
+    service = new LeadsService(
+      prisma as unknown as PrismaService,
+      whatsapp as unknown as WhatsappService,
+    );
   });
 
   describe('findAll', () => {
@@ -74,18 +85,123 @@ describe('LeadsService', () => {
       expect(prisma.lead.update).not.toHaveBeenCalled();
     });
 
-    it('records the approval and marks the lead as sent', async () => {
-      prisma.lead.findUnique.mockResolvedValue({ id: 'lead-1' });
+    it('throws ConflictException when the lead was already sent', async () => {
+      prisma.lead.findUnique.mockResolvedValue({
+        id: 'lead-1',
+        status: 'sent',
+        company: { whatsapp: '5511999999999', phone: null },
+      });
+
+      await expect(service.send('lead-1', { approvedBy: 'ana' })).rejects.toThrow(
+        ConflictException,
+      );
+      expect(prisma.lead.update).not.toHaveBeenCalled();
+      expect(prisma.contactAttempt.create).not.toHaveBeenCalled();
+    });
+
+    it('sends via the WhatsApp Cloud API when configured and records a whatsapp_api attempt', async () => {
+      prisma.lead.findUnique.mockResolvedValue({
+        id: 'lead-1',
+        status: 'not_sent',
+        approachMessage: 'Olá!',
+        company: { whatsapp: '5511999999999', phone: null },
+      });
+      whatsapp.isConfigured.mockReturnValue(true);
+      whatsapp.sendTemplateMessage.mockResolvedValue({ providerMessageId: 'wamid.123' });
       prisma.lead.update.mockResolvedValue({ id: 'lead-1', status: 'sent' });
 
       await service.send('lead-1', { approvedBy: 'ana' });
 
+      expect(whatsapp.sendTemplateMessage).toHaveBeenCalledWith('5511999999999', 'Olá!');
+      expect(prisma.contactAttempt.create).toHaveBeenCalledWith({
+        data: {
+          leadId: 'lead-1',
+          channel: 'whatsapp_api',
+          status: 'sent',
+          providerMessageId: 'wamid.123',
+        },
+      });
       const call = prisma.lead.update.mock.calls[0] as unknown as [
         { where: { id: string }; data: { status: string; approvedBy: string } },
       ];
       expect(call[0].where).toEqual({ id: 'lead-1' });
       expect(call[0].data.status).toBe('sent');
       expect(call[0].data.approvedBy).toBe('ana');
+    });
+
+    it('falls back to a manual wa.me link when the Cloud API is not configured', async () => {
+      prisma.lead.findUnique.mockResolvedValue({
+        id: 'lead-1',
+        status: 'not_sent',
+        approachMessage: 'Olá!',
+        company: { whatsapp: '5511999999999', phone: null },
+      });
+      whatsapp.isConfigured.mockReturnValue(false);
+      prisma.lead.update.mockResolvedValue({ id: 'lead-1', status: 'sent' });
+
+      await service.send('lead-1', { approvedBy: 'ana' });
+
+      expect(whatsapp.sendTemplateMessage).not.toHaveBeenCalled();
+      expect(prisma.contactAttempt.create).toHaveBeenCalledWith({
+        data: {
+          leadId: 'lead-1',
+          channel: 'manual_link',
+          status: 'sent',
+          providerMessageId: 'https://wa.me/5511999999999?text=Ol%C3%A1!',
+        },
+      });
+    });
+
+    it('falls back to a manual link when the Cloud API call fails', async () => {
+      prisma.lead.findUnique.mockResolvedValue({
+        id: 'lead-1',
+        status: 'not_sent',
+        approachMessage: 'Olá!',
+        company: { whatsapp: '5511999999999', phone: null },
+      });
+      whatsapp.isConfigured.mockReturnValue(true);
+      whatsapp.sendTemplateMessage.mockRejectedValue(new Error('template not approved'));
+      prisma.lead.update.mockResolvedValue({ id: 'lead-1', status: 'sent' });
+
+      await service.send('lead-1', { approvedBy: 'ana' });
+
+      expect(prisma.contactAttempt.create).toHaveBeenNthCalledWith(1, {
+        data: {
+          leadId: 'lead-1',
+          channel: 'whatsapp_api',
+          status: 'failed',
+          errorMessage: 'template not approved',
+        },
+      });
+      expect(prisma.contactAttempt.create).toHaveBeenNthCalledWith(2, {
+        data: {
+          leadId: 'lead-1',
+          channel: 'manual_link',
+          status: 'sent',
+          providerMessageId: 'https://wa.me/5511999999999?text=Ol%C3%A1!',
+        },
+      });
+    });
+
+    it('records a failed manual_link attempt when the lead has no phone at all', async () => {
+      prisma.lead.findUnique.mockResolvedValue({
+        id: 'lead-1',
+        status: 'not_sent',
+        approachMessage: 'Olá!',
+        company: { whatsapp: null, phone: null },
+      });
+      prisma.lead.update.mockResolvedValue({ id: 'lead-1', status: 'sent' });
+
+      await service.send('lead-1', { approvedBy: 'ana' });
+
+      expect(prisma.contactAttempt.create).toHaveBeenCalledWith({
+        data: {
+          leadId: 'lead-1',
+          channel: 'manual_link',
+          status: 'failed',
+          errorMessage: 'Lead sem telefone/WhatsApp cadastrado',
+        },
+      });
     });
   });
 });
