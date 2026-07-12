@@ -79,11 +79,13 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 7 — CRM + Dashboard (módulos 2.9, 2.10)
 
-- [ ] Status de funil por lead (`Não enviado → ... → Cliente/Perdido`)
-- [ ] Dashboard com métricas do dia/período
-- [ ] Follow-up (lembretes, próxima ação)
+- [x] Status de funil por lead (`Não enviado → ... → Cliente/Perdido`) — `PATCH /leads/:id/status` + histórico em `LeadStatusEvent` (ADR 0013)
+- [x] Dashboard com métricas do dia/período — `GET /dashboard/metrics` + home do `apps/web`
+- [x] Follow-up (lembretes, próxima ação) — `Lead.nextActionAt`/`nextActionNote`, vencidos listados no dashboard
 
 **Critério de saída:** dashboard reflete em tempo real os números do funil descritos em `README.md`.
+
+> Implementado e coberto por testes unitários (8 novos — 108/108 em `apps/api`) e `lint`/`typecheck`/`build` verdes. ADR 0013 registra as decisões: histórico de transições em tabela de eventos (necessário para métricas por período), atualização manual de status restrita a leads já enviados (a única saída de `not_sent` continua sendo o gate de aprovação), follow-up *pull* (o dashboard lista vencidos; sem notificação push no MVP) e corte `finalScore >= 50` para "oportunidade identificada". Mesma limitação das fases anteriores: não validado contra Postgres real neste ambiente.
 
 ## Fase 8 — Hardening para produção
 

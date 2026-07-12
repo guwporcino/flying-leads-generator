@@ -20,6 +20,9 @@ export interface Lead {
   approvedBy: string | null;
   approvedAt: string | null;
   sentAt: string | null;
+  /** Follow-up — ver ADR 0013. Próxima ação registrada pelo operador. */
+  nextActionAt: string | null;
+  nextActionNote: string | null;
   createdAt: string;
   updatedAt: string;
   /** Presente apenas quando o backend inclui o histórico (ex.: resposta de POST /leads/:id/send) */

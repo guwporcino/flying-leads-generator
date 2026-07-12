@@ -64,3 +64,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `apps/web`: tela do lead mostra se o envio foi via API oficial ou se precisa de abertura manual (com o link `wa.me` pronto).
   - ADR 0012 registra as decisões técnicas: Cloud API direta sem BSP, template único com variável de corpo, fallback manual sempre disponível, histórico via `ContactAttempt`.
   - 12 novos testes unitários (100/100 no total em `apps/api`) cobrindo `WhatsappService`, `buildWhatsappManualLink` e os caminhos de `LeadsService.send()` (API ok, API indisponível, API falha com fallback, sem telefone, reenvio recusado). Não testado com credenciais reais nem com um template de fato aprovado no Meta Business Manager — pendência registrada em `TODO.md`.
+- **Fase 7 — CRM + Dashboard:**
+  - Novo model `LeadStatusEvent` (migration `20260712043000_add_crm_funnel_and_follow_up`): histórico de toda transição de status do funil, inclusive `not_sent → sent` gravada pelo próprio gate de envio — é o que torna métricas por período possíveis ("respostas hoje").
+  - `PATCH /leads/:id/status`: atualização manual de estágio pelo operador (visualizou/respondeu/interessado/reunião/cliente/perdido), com validação: lead em `not_sent` não pode ser movido manualmente e ninguém re-seta `not_sent`/`sent` (estados geridos pelo sistema). Entre estágios pós-envio o movimento é livre, inclusive para trás (ADR 0013).
+  - Follow-up: campos `Lead.nextActionAt`/`nextActionNote` editáveis via `PATCH /leads/:id`; modelo *pull* — o dashboard lista os vencidos, sem notificação push no MVP.
+  - `DashboardModule`: `GET /dashboard/metrics?from=&to=` (default: dia corrente UTC) — empresas encontradas, oportunidades identificadas (`finalScore >= 50`), previews criados, mensagens enviadas, respostas/reuniões/vendas (via eventos), snapshot do funil por status e follow-ups vencidos.
+  - `apps/web`: a home vira o dashboard real (KPIs, funil em barras, follow-ups vencidos com link para o lead); tela do lead ganha seletor de status do funil e campos de follow-up.
+  - ADR 0013 registra as decisões (tabela de eventos, regras de transição, follow-up pull, corte de oportunidade).
+  - 8 novos testes unitários (108/108 no total em `apps/api`).

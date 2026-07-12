@@ -1,6 +1,16 @@
 # TODO — backlog acionável
 
-Fases 0 a 6 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 7 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 7 — pendência: aplicar a migration + validação ponta a ponta
+
+- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase
+- [ ] Com o banco/API rodando de verdade, abrir a home (`/`) e conferir o dashboard com dados reais; mover um lead pelo funil e ver as métricas refletirem
+- [ ] Avaliar automatizar o estágio "Visualizou" (tracking de abertura do preview) — hoje é 100% manual; encaixa no mesmo `LeadStatusEvent` sem mudar schema (ver ADR 0013)
+
+Próximos itens acionáveis depois disso: Fase 8 — Hardening para produção, ver `ROADMAP.md`.
+
+---
 
 ## Fase 6 — pendência: template WhatsApp + migration + validação ponta a ponta
 
@@ -8,7 +18,7 @@ Código completo e testado (mocks) — falta validar contra infraestrutura real:
 
 - [ ] Cadastrar e aprovar o template de mensagem no Meta Business Manager (nome/idioma default: `abordagem_lead`/`pt_BR`, configurável via `WHATSAPP_TEMPLATE_NAME`/`WHATSAPP_TEMPLATE_LANGUAGE`) — nenhum envio real via Cloud API funciona sem isso
 - [ ] Confirmar `WHATSAPP_BUSINESS_API_TOKEN`/`WHATSAPP_BUSINESS_PHONE_NUMBER_ID` reais (número verificado no Meta Business Manager)
-- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712030000_add_contact_attempts` no Supabase
+- [x] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712030000_add_contact_attempts` no Supabase — aplicada com sucesso ([run #3](https://github.com/guwporcino/flying-leads-generator/actions/runs/29179526764))
 - [ ] Rodar `POST /leads/:id/send` de ponta a ponta com um lead real, confirmando o fallback manual (`wa.me`) quando as credenciais não estão configuradas e o envio real quando estão
 
 Próximos itens acionáveis depois disso: Fase 7 — CRM + Dashboard, ver `ROADMAP.md`.

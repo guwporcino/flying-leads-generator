@@ -6,7 +6,12 @@ import { WhatsappService } from '../whatsapp/whatsapp.service';
 describe('LeadsService', () => {
   let service: LeadsService;
   let prisma: {
-    lead: { findMany: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
+    lead: {
+      findMany: jest.Mock;
+      findUnique: jest.Mock;
+      findUniqueOrThrow: jest.Mock;
+      update: jest.Mock;
+    };
     contactAttempt: { create: jest.Mock };
   };
   let whatsapp: { isConfigured: jest.Mock; sendTemplateMessage: jest.Mock };
@@ -16,6 +21,7 @@ describe('LeadsService', () => {
       lead: {
         findMany: jest.fn().mockResolvedValue([]),
         findUnique: jest.fn(),
+        findUniqueOrThrow: jest.fn(),
         update: jest.fn(),
       },
       contactAttempt: { create: jest.fn() },
@@ -72,6 +78,61 @@ describe('LeadsService', () => {
           data: { notes: 'ligar amanhã' },
         }),
       );
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('throws NotFoundException when the lead does not exist', async () => {
+      prisma.lead.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.updateStatus('missing-id', { status: 'replied', changedBy: 'ana' }),
+      ).rejects.toThrow(NotFoundException);
+      expect(prisma.lead.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects moving a lead that has not been sent yet', async () => {
+      prisma.lead.findUnique.mockResolvedValue({ id: 'lead-1', status: 'not_sent' });
+
+      await expect(
+        service.updateStatus('lead-1', { status: 'replied', changedBy: 'ana' }),
+      ).rejects.toThrow(ConflictException);
+      expect(prisma.lead.update).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when the status is unchanged (no event recorded)', async () => {
+      prisma.lead.findUnique.mockResolvedValue({ id: 'lead-1', status: 'replied' });
+      prisma.lead.findUniqueOrThrow.mockResolvedValue({ id: 'lead-1', status: 'replied' });
+
+      await service.updateStatus('lead-1', { status: 'replied', changedBy: 'ana' });
+
+      expect(prisma.lead.update).not.toHaveBeenCalled();
+    });
+
+    it('updates the status and records a LeadStatusEvent', async () => {
+      prisma.lead.findUnique.mockResolvedValue({ id: 'lead-1', status: 'sent' });
+      prisma.lead.update.mockResolvedValue({ id: 'lead-1', status: 'replied' });
+
+      await service.updateStatus('lead-1', { status: 'replied', changedBy: 'ana' });
+
+      const call = prisma.lead.update.mock.calls[0] as unknown as [
+        {
+          where: { id: string };
+          data: {
+            status: string;
+            statusEvents: {
+              create: { fromStatus: string; toStatus: string; changedBy: string };
+            };
+          };
+        },
+      ];
+      expect(call[0].where).toEqual({ id: 'lead-1' });
+      expect(call[0].data.status).toBe('replied');
+      expect(call[0].data.statusEvents.create).toEqual({
+        fromStatus: 'sent',
+        toStatus: 'replied',
+        changedBy: 'ana',
+      });
     });
   });
 
