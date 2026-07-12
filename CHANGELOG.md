@@ -72,3 +72,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - `apps/web`: a home vira o dashboard real (KPIs, funil em barras, follow-ups vencidos com link para o lead); tela do lead ganha seletor de status do funil e campos de follow-up.
   - ADR 0013 registra as decisões (tabela de eventos, regras de transição, follow-up pull, corte de oportunidade).
   - 8 novos testes unitários (108/108 no total em `apps/api`).
+- **Fase 8 — Hardening para produção:**
+  - `AuthGuard` global (Supabase Auth): verifica JWT HS256 assinado com `SUPABASE_JWT_SECRET`, rejeita a anon key (role ≠ `authenticated`); sem o secret, a API roda aberta em modo dev com aviso único no log (ADR 0014). `@Public()` marca `GET /health` fora da autenticação.
+  - Superfície HTTP: `helmet`, rate limiting global (100 req/60s por IP via `@nestjs/throttler`, `/health` isento), CORS restrito a `CORS_ORIGIN` (default `http://localhost:3001`), `forbidNonWhitelisted` no ValidationPipe (campo desconhecido → 400).
+  - Logs estruturados com `nestjs-pino`: JSON em produção, `pino-pretty` em dev, log automático de cada request (ignorando `/health`).
+  - Acessibilidade/SEO dos sites gerados por construção: landmarks (`header`/`main`/`footer`), um único `h1`, estrela decorativa com `aria-hidden`, `aria-label` nos links de ação, `rel="noopener noreferrer"` em links externos, OpenGraph no metadata — com testes que quebram o build em regressão.
+  - e2e novos (`hardening.e2e-spec.ts`): health público, 401 sem token/com anon key, 200 com JWT válido, 400 de validação (status inválido, campo extra), 404 — sem exigir banco (Prisma mockado).
+  - `docker-compose.yml` (Postgres 16 + Redis 7) e seção "Rodando localmente" no `README.md`; `apps/web` fixado na porta 3001 (API fica na 3000).
+  - LGPD documentada na ADR 0014: só dados públicos de estabelecimentos, contato exclusivamente via canal oficial com aprovação humana, exclusão em cascata por FK.
+  - 11 novos testes unitários (119/119 no total em `apps/api`) + 10 novos e2e (11/11 no total).

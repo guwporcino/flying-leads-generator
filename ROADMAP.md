@@ -89,13 +89,15 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 8 — Hardening para produção
 
-- [ ] Testes automatizados (unit + e2e) cobrindo os módulos 2.1–2.9
-- [ ] Autenticação/autorização (Supabase Auth) e multi-tenant se aplicável
-- [ ] Observabilidade (logs estruturados, métricas, alertas)
-- [ ] Revisão de segurança (secrets, rate limiting, LGPD sobre dados coletados)
-- [ ] Auditoria de acessibilidade e performance nos sites gerados
+- [x] Testes automatizados (unit + e2e) cobrindo os módulos 2.1–2.9 — unitários desde a Fase 1 (um spec por serviço); e2e agora cobre autenticação, ValidationPipe (400s), 404s e o shape do dashboard sem exigir banco
+- [x] Autenticação/autorização (Supabase Auth) — `AuthGuard` global verificando JWT HS256 do Supabase (`SUPABASE_JWT_SECRET`); sem o secret a API roda aberta em modo dev com aviso (ADR 0014); multi-tenant **não se aplica** ao MVP single-operator
+- [x] Observabilidade (logs estruturados) — `nestjs-pino`: JSON em produção, pretty em dev, log automático de request; métricas/alertas de infra ficam com o ambiente de deploy (documentado)
+- [x] Revisão de segurança — `helmet`, rate limiting global (100 req/60s, `@nestjs/throttler`), CORS restrito a `CORS_ORIGIN`, `forbidNonWhitelisted` no ValidationPipe, secrets só por env, postura LGPD documentada na ADR 0014 (dados públicos de estabelecimentos; exclusão em cascata por FK)
+- [x] Auditoria de acessibilidade nos sites gerados — baseline por construção no template (lang, landmarks, headings, aria, noopener, OpenGraph) com testes que quebram o build em regressão; Lighthouse real fica para a validação com site publicado (`TODO.md`)
 
 **Critério de saída:** sistema aprovado nos critérios da skill `autonomous-saas-engineer` (Agent 5 — Engineering Auditor) em todas as categorias.
+
+> Fase final do roadmap. Pendências que dependem de infra/credenciais reais (login do dashboard contra um projeto Supabase real, Lighthouse contra site publicado) estão em `TODO.md` — não são código novo, são validação.
 
 ---
 

@@ -95,4 +95,44 @@ describe('renderSiteFiles', () => {
       JSON.parse(packageJson.content);
     }).not.toThrow();
   });
+
+  describe('accessibility and SEO baseline (ver ADR 0014)', () => {
+    it('declares the page language and OpenGraph metadata', () => {
+      const files = renderSiteFiles(buildCompany(), buildContent());
+      const layout = files.find((file) => file.path === 'app/layout.tsx')!;
+
+      expect(layout.content).toContain('lang="pt-BR"');
+      expect(layout.content).toContain('openGraph');
+      expect(layout.content).toContain('"pt_BR"');
+    });
+
+    it('uses semantic landmarks (header, main, footer) and hierarchical headings', () => {
+      const files = renderSiteFiles(buildCompany(), buildContent());
+      const page = files.find((file) => file.path === 'app/page.tsx')!.content;
+
+      expect(page).toContain('<header');
+      expect(page).toContain('<main');
+      expect(page).toContain('<footer');
+      expect(page).toContain('<h1');
+      expect(page).toContain('<h2');
+      // Um único h1 por página
+      expect(page.match(/<h1/g)).toHaveLength(1);
+    });
+
+    it('hides the decorative star from screen readers and labels action links', () => {
+      const files = renderSiteFiles(buildCompany(), buildContent());
+      const page = files.find((file) => file.path === 'app/page.tsx')!.content;
+
+      expect(page).toContain('aria-hidden="true"');
+      expect(page).toContain('aria-label="Conversar no WhatsApp"');
+      expect(page).toContain('aria-label="Ver localização no Google Maps"');
+    });
+
+    it('opens external links safely (noopener noreferrer)', () => {
+      const files = renderSiteFiles(buildCompany(), buildContent());
+      const page = files.find((file) => file.path === 'app/page.tsx')!.content;
+
+      expect(page).toContain('rel="noopener noreferrer"');
+    });
+  });
 });
