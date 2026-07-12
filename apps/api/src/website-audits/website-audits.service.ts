@@ -3,6 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Company } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { OpportunityScoreService } from '../opportunity-score/opportunity-score.service';
 import { WEBSITE_AUDIT_QUEUE } from './website-audits.constants';
 import { WebsiteAuditJobData } from './website-audits.types';
 
@@ -11,6 +12,7 @@ export class WebsiteAuditsService {
   constructor(
     @InjectQueue(WEBSITE_AUDIT_QUEUE) private readonly queue: Queue<WebsiteAuditJobData>,
     private readonly prisma: PrismaService,
+    private readonly opportunityScore: OpportunityScoreService,
   ) {}
 
   /**
@@ -32,5 +34,6 @@ export class WebsiteAuditsService {
       create: { companyId, hasWebsite: false, detectedTechnology: [], socialLinks: [] },
       update: { hasWebsite: false },
     });
+    await this.opportunityScore.recordNoWebsiteOpportunity(companyId);
   }
 }

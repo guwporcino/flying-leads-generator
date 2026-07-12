@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GooglePlacesService } from '../google-places/google-places.service';
 import { PlaceSearchResultItem } from '../google-places/google-places.types';
 import { WebsiteAuditsService } from '../website-audits/website-audits.service';
+import { sortByOpportunity } from '../opportunity-score/sort-by-opportunity';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignFiltersDto } from './dto/campaign-filters.dto';
 
@@ -64,15 +65,16 @@ export class CampaignsService {
     return this.prisma.campaign.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  async findOne(id: string): Promise<Campaign & { companies: Company[] }> {
+  /** Empresas da campanha vêm ordenadas por Opportunity Score (ver ADR 0009). */
+  async findOne(id: string) {
     const campaign = await this.prisma.campaign.findUnique({
       where: { id },
-      include: { companies: true },
+      include: { companies: { include: { opportunityScore: true } } },
     });
     if (!campaign) {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
-    return campaign;
+    return { ...campaign, companies: sortByOpportunity(campaign.companies) };
   }
 
   /** Falha ao enfileirar uma auditoria não deve derrubar a criação da campanha. */

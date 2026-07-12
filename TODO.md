@@ -1,6 +1,12 @@
 # TODO — backlog acionável
 
-Fases 0, 1 e 2 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0, 1, 2 e 3 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 3 — pendência
+
+Sem pendência própria além da validação de ponta a ponta que já está registrada na Fase 2 (o Opportunity Score roda dentro do mesmo pipeline). Próximos itens acionáveis: Fase 4 — Gerador de Website + Deploy automático, ver `ROADMAP.md`.
+
+---
 
 ## Fase 2 — pendência: validação com Redis + Claude reais
 

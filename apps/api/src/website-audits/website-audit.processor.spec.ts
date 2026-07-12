@@ -6,6 +6,7 @@ import { ScraperService } from './scraper/scraper.service';
 import { WebsiteGraderService } from './grader/website-grader.service';
 import { ScrapedWebsiteData } from './scraper/scraper.types';
 import { WebsiteAuditJobData } from './website-audits.types';
+import { OpportunityScoreService } from '../opportunity-score/opportunity-score.service';
 
 function buildCompany(overrides: Partial<Company> = {}): Company {
   return {
@@ -59,6 +60,7 @@ describe('WebsiteAuditProcessor', () => {
   };
   let scraper: { analyze: jest.Mock };
   let grader: { grade: jest.Mock };
+  let opportunityScore: { recordFromAudit: jest.Mock };
 
   beforeEach(() => {
     prisma = {
@@ -67,10 +69,12 @@ describe('WebsiteAuditProcessor', () => {
     };
     scraper = { analyze: jest.fn() };
     grader = { grade: jest.fn() };
+    opportunityScore = { recordFromAudit: jest.fn() };
     processor = new WebsiteAuditProcessor(
       prisma as unknown as PrismaService,
       scraper as unknown as ScraperService,
       grader as unknown as WebsiteGraderService,
+      opportunityScore as unknown as OpportunityScoreService,
     );
   });
 
@@ -119,6 +123,12 @@ describe('WebsiteAuditProcessor', () => {
     expect(upsertArgs.create.aiGrade).toBe('Regular');
     expect(upsertArgs.create.performanceScore).toBe(100);
     expect(upsertArgs.create.seoScore).toBe(70);
+
+    expect(opportunityScore.recordFromAudit).toHaveBeenCalledWith(
+      'company-1',
+      expect.objectContaining({ hasWebsite: true, performanceScore: 100, seoScore: 70 }),
+      60,
+    );
   });
 
   it('skips companies that no longer have a website', async () => {
@@ -129,5 +139,6 @@ describe('WebsiteAuditProcessor', () => {
 
     expect(scraper.analyze).not.toHaveBeenCalled();
     expect(prisma.websiteAudit.upsert).not.toHaveBeenCalled();
+    expect(opportunityScore.recordFromAudit).not.toHaveBeenCalled();
   });
 });

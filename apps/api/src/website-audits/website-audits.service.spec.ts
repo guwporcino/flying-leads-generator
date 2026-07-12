@@ -2,6 +2,7 @@ import { Queue } from 'bullmq';
 import { Company } from '@prisma/client';
 import { WebsiteAuditsService } from './website-audits.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { OpportunityScoreService } from '../opportunity-score/opportunity-score.service';
 import { WebsiteAuditJobData } from './website-audits.types';
 
 function buildCompany(overrides: Partial<Company> = {}): Company {
@@ -31,13 +32,16 @@ describe('WebsiteAuditsService', () => {
   let service: WebsiteAuditsService;
   let queue: { add: jest.Mock };
   let prisma: { websiteAudit: { upsert: jest.Mock } };
+  let opportunityScore: { recordNoWebsiteOpportunity: jest.Mock };
 
   beforeEach(() => {
     queue = { add: jest.fn() };
     prisma = { websiteAudit: { upsert: jest.fn() } };
+    opportunityScore = { recordNoWebsiteOpportunity: jest.fn() };
     service = new WebsiteAuditsService(
       queue as unknown as Queue<WebsiteAuditJobData>,
       prisma as unknown as PrismaService,
+      opportunityScore as unknown as OpportunityScoreService,
     );
   });
 
@@ -59,5 +63,6 @@ describe('WebsiteAuditsService', () => {
     const upsertArgs = calls[0]![0];
     expect(upsertArgs.where).toEqual({ companyId: 'company-1' });
     expect(upsertArgs.create.hasWebsite).toBe(false);
+    expect(opportunityScore.recordNoWebsiteOpportunity).toHaveBeenCalledWith('company-1');
   });
 });
