@@ -1,6 +1,16 @@
 # TODO — backlog acionável
 
-Fases 0 a 4 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 5 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 5 — pendência: aplicar a migration + validação ponta a ponta
+
+- [ ] Disparar `.github/workflows/db-migrate.yml` (Actions → DB Migrate → Run workflow) para aplicar `20260712004025_add_lead_notes` no Supabase
+- [ ] Depois de resolver as pendências da Fase 4 (GitHub/Vercel reais), abrir `/leads` no dashboard e conferir a tela de aprovação com um lead real
+- [ ] Avaliar se vale reaproveitar `POST /leads/:id/send` como o disparo real de WhatsApp na Fase 6, ou se precisa de ajuste — ver ADR 0011
+
+Próximos itens acionáveis depois disso: Fase 6 — WhatsApp, ver `ROADMAP.md`.
+
+---
 
 ## Fase 4 — pendência: validação com GitHub/Vercel reais
 

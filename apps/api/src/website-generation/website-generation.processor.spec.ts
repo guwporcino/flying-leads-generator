@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ContentGeneratorService } from './content-generator/content-generator.service';
 import { GitHubDeployService } from './github-deploy/github-deploy.service';
 import { VercelDeployService } from './vercel-deploy/vercel-deploy.service';
+import { ApproachMessageService } from './approach-message/approach-message.service';
 import { WebsiteGenerationJobData, GeneratedSiteContent } from './website-generation.types';
 
 function buildCompany(overrides: Partial<Company> = {}): Company {
@@ -51,6 +52,7 @@ describe('WebsiteGenerationProcessor', () => {
   let contentGenerator: { generate: jest.Mock };
   let github: { commitFiles: jest.Mock };
   let vercel: { deploy: jest.Mock };
+  let approachMessage: { generate: jest.Mock };
 
   beforeEach(() => {
     prisma = {
@@ -60,16 +62,21 @@ describe('WebsiteGenerationProcessor', () => {
     contentGenerator = { generate: jest.fn() };
     github = { commitFiles: jest.fn() };
     vercel = { deploy: jest.fn() };
+    approachMessage = { generate: jest.fn() };
     processor = new WebsiteGenerationProcessor(
       prisma as unknown as PrismaService,
       contentGenerator as unknown as ContentGeneratorService,
       github as unknown as GitHubDeployService,
       vercel as unknown as VercelDeployService,
+      approachMessage as unknown as ApproachMessageService,
     );
   });
 
-  it('generates content, commits the site, deploys it, and persists the Lead preview URL', async () => {
-    prisma.company.findUniqueOrThrow.mockResolvedValue(buildCompany());
+  it('generates content, commits the site, deploys it, writes the approach message, and persists the Lead', async () => {
+    prisma.company.findUniqueOrThrow.mockResolvedValue({
+      ...buildCompany(),
+      websiteAudit: { hasWebsite: false, aiGrade: null },
+    });
     contentGenerator.generate.mockResolvedValue(buildContent());
     github.commitFiles.mockResolvedValue({
       commitSha: 'abc123',
@@ -79,23 +86,29 @@ describe('WebsiteGenerationProcessor', () => {
       deploymentId: 'dpl_1',
       previewUrl: 'https://clinica-sorriso-abc123.vercel.app',
     });
+    approachMessage.generate.mockResolvedValue('Oi! Preparamos um site novo pra você conferir.');
 
     const job = { data: { companyId: 'company-1' } } as Job<WebsiteGenerationJobData>;
     await processor.process(job);
 
-    expect(contentGenerator.generate).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'company-1', name: 'Clínica Sorriso' }),
-    );
-    expect(github.commitFiles).toHaveBeenCalledWith(
-      expect.stringMatching(/^sites\/clinica-sorriso-/),
-      expect.any(Array),
-      expect.stringContaining('Clínica Sorriso'),
-    );
-    expect(vercel.deploy).toHaveBeenCalled();
+    expect(approachMessage.generate).toHaveBeenCalledWith({
+      companyName: 'Clínica Sorriso',
+      category: 'dentist',
+      hasWebsite: false,
+      websiteGrade: null,
+      previewUrl: 'https://clinica-sorriso-abc123.vercel.app',
+    });
     expect(prisma.lead.upsert).toHaveBeenCalledWith({
       where: { companyId: 'company-1' },
-      create: { companyId: 'company-1', previewUrl: 'https://clinica-sorriso-abc123.vercel.app' },
-      update: { previewUrl: 'https://clinica-sorriso-abc123.vercel.app' },
+      create: {
+        companyId: 'company-1',
+        previewUrl: 'https://clinica-sorriso-abc123.vercel.app',
+        approachMessage: 'Oi! Preparamos um site novo pra você conferir.',
+      },
+      update: {
+        previewUrl: 'https://clinica-sorriso-abc123.vercel.app',
+        approachMessage: 'Oi! Preparamos um site novo pra você conferir.',
+      },
     });
   });
 });

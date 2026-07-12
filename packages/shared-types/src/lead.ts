@@ -13,6 +13,7 @@ export interface Lead {
   opportunityScoreId: string | null;
   previewUrl: string | null;
   approachMessage: string | null;
+  notes: string | null;
   status: LeadStatus;
   approvedBy: string | null;
   approvedAt: string | null;

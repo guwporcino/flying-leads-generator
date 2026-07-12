@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ContentGeneratorService } from './content-generator/content-generator.service';
 import { GitHubDeployService } from './github-deploy/github-deploy.service';
 import { VercelDeployService } from './vercel-deploy/vercel-deploy.service';
+import { ApproachMessageService } from './approach-message/approach-message.service';
 import { renderSiteFiles } from './site-template';
 import { slugify } from './slugify';
 import { toCompanySiteInput } from './company-site-input';
@@ -20,6 +21,7 @@ export class WebsiteGenerationProcessor extends WorkerHost {
     private readonly contentGenerator: ContentGeneratorService,
     private readonly github: GitHubDeployService,
     private readonly vercel: VercelDeployService,
+    private readonly approachMessage: ApproachMessageService,
   ) {
     super();
   }
@@ -27,6 +29,7 @@ export class WebsiteGenerationProcessor extends WorkerHost {
   async process(job: Job<WebsiteGenerationJobData>): Promise<void> {
     const company = await this.prisma.company.findUniqueOrThrow({
       where: { id: job.data.companyId },
+      include: { websiteAudit: true },
     });
     const companySiteInput = toCompanySiteInput(company);
     const slug = slugify(company.name, company.id);
@@ -39,10 +42,22 @@ export class WebsiteGenerationProcessor extends WorkerHost {
 
     const deployment = await this.vercel.deploy(slug, files);
 
+    const message = await this.approachMessage.generate({
+      companyName: company.name,
+      category: company.category,
+      hasWebsite: company.websiteAudit?.hasWebsite ?? Boolean(company.website),
+      websiteGrade: company.websiteAudit?.aiGrade ?? null,
+      previewUrl: deployment.previewUrl,
+    });
+
     await this.prisma.lead.upsert({
       where: { companyId: company.id },
-      create: { companyId: company.id, previewUrl: deployment.previewUrl },
-      update: { previewUrl: deployment.previewUrl },
+      create: {
+        companyId: company.id,
+        previewUrl: deployment.previewUrl,
+        approachMessage: message,
+      },
+      update: { previewUrl: deployment.previewUrl, approachMessage: message },
     });
   }
 }

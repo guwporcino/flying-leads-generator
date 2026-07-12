@@ -59,11 +59,13 @@ Fases sequenciais. Cada fase só é considerada concluída quando seus critério
 
 ## Fase 5 — Fila de Aprovação Manual (módulo 2.7)
 
-- [ ] Tela de revisão: análise antiga vs. preview novo vs. mensagem sugerida
-- [ ] Edição de mensagem antes do envio
-- [ ] Ação explícita "Enviar" (sem envio automático em nenhuma hipótese)
+- [x] Tela de revisão: análise antiga vs. preview novo vs. mensagem sugerida — `apps/web/src/app/leads`
+- [x] Edição de mensagem antes do envio — `PATCH /leads/:id`
+- [x] Ação explícita "Enviar" (sem envio automático em nenhuma hipótese) — `POST /leads/:id/send`
 
 **Critério de saída:** nenhum envio acontece sem clique humano; auditoria registra quem aprovou.
+
+> Implementado e coberto por testes unitários (17 novos testes — 88/88 em `apps/api`) e `lint`/`typecheck`/`build` verdes. A mensagem de abordagem (Agent 8) passou a ser gerada automaticamente dentro do mesmo job da Fase 4, não como um trigger separado (ver ADR 0011). `POST /leads/:id/send` só grava a aprovação (quem, quando) — o envio real via WhatsApp Business API é a própria Fase 6, ainda não implementada; até lá, nenhum envio de fato acontece, então o critério de saída já vale por definição.
 
 ## Fase 6 — WhatsApp (módulo 2.8)
 

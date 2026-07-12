@@ -7,15 +7,23 @@ export default function Home() {
         Flying Leads Generator
       </h1>
       <p className="max-w-md text-sm text-zinc-600 dark:text-zinc-400">
-        Dashboard em construção — Fase 1 do roadmap (Google Maps Search Engine). Ver ARCHITECTURE.md
+        Dashboard em construção — Fase 5 do roadmap (Fila de Aprovação Manual). Ver ARCHITECTURE.md
         e ROADMAP.md na raiz do repositório.
       </p>
-      <Link
-        href="/campaigns/new"
-        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-      >
-        Nova campanha
-      </Link>
+      <div className="flex gap-3">
+        <Link
+          href="/campaigns/new"
+          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+        >
+          Nova campanha
+        </Link>
+        <Link
+          href="/leads"
+          className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium dark:border-zinc-700"
+        >
+          Fila de aprovação
+        </Link>
+      </div>
     </div>
   );
 }
