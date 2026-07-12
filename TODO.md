@@ -1,10 +1,32 @@
 # TODO — backlog acionável
 
-Fases 0 a 7 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 8 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 8 — pendência: validação com infra real
+
+Código completo e testado (unit + e2e) — falta validar contra serviços reais:
+
+- [ ] Configurar `SUPABASE_JWT_SECRET` (Settings → API no painel do Supabase) e confirmar que a API rejeita requisições sem token
+- [ ] Implementar a tela de login no `apps/web` (`@supabase/supabase-js`) e enviar o token nas chamadas — só faz sentido com um projeto Supabase com Auth habilitado
+- [ ] Rodar Lighthouse contra um site gerado publicado na Vercel (meta 95+, ARCHITECTURE §2.5)
+- [ ] Definir métricas/alertas no ambiente de deploy (uptime check no `/health`, agregação dos logs JSON)
+
+## Próximo marco: rodar o projeto localmente (guia no README)
+
+Checklist das credenciais/infra reais acumuladas nas fases — tudo documentado em `README.md` § "Rodando localmente":
+
+- [ ] Google Cloud: habilitar billing + Places API (New) + Geocoding API (Fase 1)
+- [ ] `ANTHROPIC_API_KEY` com créditos (Fases 2, 4, 5)
+- [ ] Redis e Postgres locais via `docker compose up -d` (ou Supabase para o Postgres)
+- [ ] Criar o repositório `GENERATED_SITES_REPO` + `GITHUB_TOKEN` com escrita (Fase 4)
+- [ ] `VERCEL_TOKEN` (+ `VERCEL_TEAM_ID` se aplicável) (Fase 4)
+- [ ] Template WhatsApp aprovado no Meta Business Manager + `WHATSAPP_BUSINESS_API_TOKEN`/`WHATSAPP_BUSINESS_PHONE_NUMBER_ID` (Fase 6) — sem isso o envio cai no fallback de link manual, que já funciona
+
+---
 
 ## Fase 7 — pendência: aplicar a migration + validação ponta a ponta
 
-- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase
+- [x] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase — aplicada com sucesso ([run #4](https://github.com/guwporcino/flying-leads-generator/actions/runs/29180001818))
 - [ ] Com o banco/API rodando de verdade, abrir a home (`/`) e conferir o dashboard com dados reais; mover um lead pelo funil e ver as métricas refletirem
 - [ ] Avaliar automatizar o estágio "Visualizou" (tracking de abertura do preview) — hoje é 100% manual; encaixa no mesmo `LeadStatusEvent` sem mudar schema (ver ADR 0013)
 
