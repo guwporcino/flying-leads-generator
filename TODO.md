@@ -1,6 +1,16 @@
 # TODO — backlog acionável
 
-Fases 0 a 6 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+Fases 0 a 7 concluídas — ver [`CHANGELOG.md`](./CHANGELOG.md). Histórico abaixo para referência.
+
+## Fase 7 — pendência: aplicar a migration + validação ponta a ponta
+
+- [ ] Disparar `.github/workflows/db-migrate.yml` para aplicar `20260712043000_add_crm_funnel_and_follow_up` no Supabase
+- [ ] Com o banco/API rodando de verdade, abrir a home (`/`) e conferir o dashboard com dados reais; mover um lead pelo funil e ver as métricas refletirem
+- [ ] Avaliar automatizar o estágio "Visualizou" (tracking de abertura do preview) — hoje é 100% manual; encaixa no mesmo `LeadStatusEvent` sem mudar schema (ver ADR 0013)
+
+Próximos itens acionáveis depois disso: Fase 8 — Hardening para produção, ver `ROADMAP.md`.
+
+---
 
 ## Fase 6 — pendência: template WhatsApp + migration + validação ponta a ponta
 

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { buildWhatsappManualLink } from '../whatsapp/manual-link';
 import { UpdateLeadDto } from './dto/update-lead.dto';
+import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { SendLeadDto } from './dto/send-lead.dto';
 
 const LEAD_INCLUDE = {
@@ -41,7 +42,51 @@ export class LeadsService {
 
   async update(id: string, dto: UpdateLeadDto) {
     await this.ensureExists(id);
-    return this.prisma.lead.update({ where: { id }, data: dto, include: LEAD_INCLUDE });
+    return this.prisma.lead.update({
+      where: { id },
+      data: {
+        approachMessage: dto.approachMessage,
+        notes: dto.notes,
+        nextActionAt:
+          dto.nextActionAt === undefined
+            ? undefined
+            : dto.nextActionAt === null
+              ? null
+              : new Date(dto.nextActionAt),
+        nextActionNote: dto.nextActionNote,
+      },
+      include: LEAD_INCLUDE,
+    });
+  }
+
+  /**
+   * Mudança manual de estágio do funil (ver ADR 0013). Só vale para leads já
+   * enviados — a única saída de `not_sent` é o gate de aprovação (`send`).
+   * Toda mudança grava um LeadStatusEvent.
+   */
+  async updateStatus(id: string, dto: UpdateLeadStatusDto) {
+    const lead = await this.prisma.lead.findUnique({ where: { id } });
+    if (!lead) {
+      throw new NotFoundException(`Lead ${id} not found`);
+    }
+    if (lead.status === 'not_sent') {
+      throw new ConflictException(
+        `Lead ${id} has not been sent yet — use POST /leads/${id}/send first`,
+      );
+    }
+    if (lead.status === dto.status) {
+      return this.prisma.lead.findUniqueOrThrow({ where: { id }, include: LEAD_INCLUDE });
+    }
+    return this.prisma.lead.update({
+      where: { id },
+      data: {
+        status: dto.status,
+        statusEvents: {
+          create: { fromStatus: lead.status, toStatus: dto.status, changedBy: dto.changedBy },
+        },
+      },
+      include: LEAD_INCLUDE,
+    });
   }
 
   /**
@@ -70,7 +115,15 @@ export class LeadsService {
     const now = new Date();
     return this.prisma.lead.update({
       where: { id },
-      data: { status: 'sent', approvedBy: dto.approvedBy, approvedAt: now, sentAt: now },
+      data: {
+        status: 'sent',
+        approvedBy: dto.approvedBy,
+        approvedAt: now,
+        sentAt: now,
+        statusEvents: {
+          create: { fromStatus: 'not_sent', toStatus: 'sent', changedBy: dto.approvedBy },
+        },
+      },
       include: SEND_INCLUDE,
     });
   }

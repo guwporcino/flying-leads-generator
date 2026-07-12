@@ -136,14 +136,38 @@ model Lead {
   approvedBy         String?
   approvedAt         DateTime?
   sentAt             DateTime?
+  // Follow-up (ver ADR 0013): próxima ação registrada pelo operador; o
+  // dashboard lista os vencidos (pull), não há notificação push.
+  nextActionAt       DateTime?
+  nextActionNote     String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
   company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   opportunityScore OpportunityScore? @relation(fields: [opportunityScoreId], references: [id])
   contactAttempts  ContactAttempt[]
+  statusEvents     LeadStatusEvent[]
 
   @@map("leads")
+}
+
+/**
+ * Histórico de transições do funil de CRM — ver ADR 0013. Uma linha por
+ * mudança de status (inclusive not_sent → sent, gravada pelo gate de envio).
+ */
+model LeadStatusEvent {
+  id         String     @id @default(uuid())
+  leadId     String
+  fromStatus LeadStatus
+  toStatus   LeadStatus
+  changedBy  String
+  createdAt  DateTime   @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([toStatus, createdAt])
+  @@map("lead_status_events")
 }
 
 /**

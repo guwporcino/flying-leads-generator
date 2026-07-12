@@ -10,6 +10,7 @@ import { WebsiteGenerationModule } from './website-generation/website-generation
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CompaniesModule } from './companies/companies.module';
 import { LeadsModule } from './leads/leads.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { LeadsModule } from './leads/leads.module';
     CampaignsModule,
     CompaniesModule,
     LeadsModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}
